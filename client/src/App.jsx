@@ -1,4 +1,4 @@
-import { uimport { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 const API_URL = "https://my-to-do-app-api.onrender.com";
