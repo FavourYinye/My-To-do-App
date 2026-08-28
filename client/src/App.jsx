@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 
+// Paste your Render backend URL here (no trailing slash / at the end)
+const API_URL = "https://my-to-do-app-jf4j.onrender.com";
+
 function App() {
   const [todos, setTodos] = useState([])
   const [title, setTitle] = useState('')
 
   async function loadTodos() {
-    const res = await fetch('/api/todos')
+    const res = await fetch(`${API_URL}/api/todos`)
     setTodos(await res.json())
   }
 
@@ -15,7 +18,7 @@ function App() {
   async function addTodo(event) {
     event.preventDefault()
     if (!title.trim()) return
-    await fetch('/api/todos', {
+    await fetch(`${API_URL}/api/todos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title })
@@ -25,12 +28,12 @@ function App() {
   }
 
   async function toggleTodo(id) {
-    await fetch('/api/todos/' + id, { method: 'PATCH' })
+    await fetch(`${API_URL}/api/todos/` + id, { method: 'PATCH' })
     loadTodos()
   }
 
   async function deleteTodo(id) {
-    await fetch('/api/todos/' + id, { method: 'DELETE' })
+    await fetch(`${API_URL}/api/todos/` + id, { method: 'DELETE' })
     loadTodos()
   }
 
