@@ -4,10 +4,10 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 
-// Setup connection pool using DATABASE_URL or individual env vars
+// Setup connection pool using DATABASE_URL or individual variables
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+  connectionString: process.env.DATABASE_URL || `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+  ssl: { rejectUnauthorized: false }
 });
 
 // Auto-create table if missing
@@ -23,7 +23,7 @@ const initDb = async () => {
     `);
     console.log("Database table 'todos' is ready.");
   } catch (err) {
-    console.error("Error creating database table:", err);
+    console.error("Error creating database table:", err.message || err);
   }
 };
 initDb();
@@ -33,6 +33,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Root route welcome message
+app.get('/', (req, res) => {
+  res.send('To-Do List API is running successfully!');
+});
+
 // Get all to-do items
 app.get('/api/todos', async (req, res) => {
   try {
@@ -40,7 +45,7 @@ app.get('/api/todos', async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error("Database query error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message || "Database connection error" });
   }
 });
 
@@ -59,7 +64,7 @@ app.post('/api/todos', async (req, res) => {
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message || "Database insert error" });
   }
 });
 
@@ -77,7 +82,7 @@ app.patch('/api/todos/:id', async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message || "Database update error" });
   }
 });
 
@@ -95,7 +100,7 @@ app.delete('/api/todos/:id', async (req, res) => {
 
     res.status(204).end();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message || "Database delete error" });
   }
 });
 
