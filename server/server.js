@@ -4,13 +4,13 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 
-// 1. Configure Database Connection with SSL (Required for Render)
+// Setup connection pool using DATABASE_URL or individual env vars
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
-// 2. Automatically create the 'todos' table if it doesn't exist
+// Auto-create table if missing
 const initDb = async () => {
   try {
     await pool.query(`
@@ -33,12 +33,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Get all to-do items, newest first
+// Get all to-do items
 app.get('/api/todos', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM todos ORDER BY id DESC');
     res.json(result.rows);
   } catch (err) {
+    console.error("Database query error:", err);
     res.status(500).json({ error: err.message });
   }
 });

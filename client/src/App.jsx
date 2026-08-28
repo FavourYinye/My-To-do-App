@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'
+import { uimport { useState, useEffect } from 'react'
 import './App.css'
 
-// Paste your Render backend URL here (no trailing slash / at the end)
 const API_URL = "https://my-to-do-app-jf4j.onrender.com";
 
 function App() {
@@ -9,8 +8,19 @@ function App() {
   const [title, setTitle] = useState('')
 
   async function loadTodos() {
-    const res = await fetch(`${API_URL}/api/todos`)
-    setTodos(await res.json())
+    try {
+      const res = await fetch(`${API_URL}/api/todos`)
+      const data = await res.json()
+      if (Array.isArray(data)) {
+        setTodos(data)
+      } else {
+        console.error("Server returned non-array error:", data)
+        setTodos([])
+      }
+    } catch (err) {
+      console.error("Failed to fetch todos:", err)
+      setTodos([])
+    }
   }
 
   useEffect(() => { loadTodos() }, [])
@@ -49,7 +59,7 @@ function App() {
         <button type="submit">Add</button>
       </form>
       <ul>
-        {todos.map((todo) => (
+        {Array.isArray(todos) && todos.map((todo) => (
           <li key={todo.id}>
             <input
               type="checkbox"
@@ -61,7 +71,7 @@ function App() {
           </li>
         ))}
       </ul>
-      {todos.length === 0 && <p>Nothing here yet. Add your first to-do.</p>}
+      {(!todos || todos.length === 0) && <p>Nothing here yet. Add your first to-do.</p>}
     </div>
   )
 }
