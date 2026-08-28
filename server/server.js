@@ -1,10 +1,12 @@
 require('dotenv').config();
 
 const express = require('express');
+const cors = require('cors'); // 1. Import cors
 const pool = require('./db');
 
 const app = express();
 
+app.use(cors()); // 2. Enable CORS for all incoming requests
 app.use(express.json());
 
 // Get all to-do items, newest first
